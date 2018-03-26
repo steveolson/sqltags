@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+         "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd"
+>
+
+
+<taglib>
+  <tlibversion>1.0</tlibversion>
+  <jspversion>1.1</jspversion>
+  <shortname>ccauth</shortname>
+  <info>
+	CCAuthProcessor tag library
+  </info>
+
+  <tag>
+    <name>requestData</name>
+    <tagclass>com.aitworks.beans.registartion.ShowData</tagclass>
+    <bodycontent>JSP</bodycontent>
+
+    <attribute>
+	<name>x_ADC_Delim_Data</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_ADC_URL</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Version</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Amount</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Card_Num</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Exp_Date</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Method</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Login</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Password</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Test_Request</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Trans_ID</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Auth_Code</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Type</name>
+	<required>false</required>
+    </attribute>
+
+
+    <attribute>
+	<name>x_First_Name</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Last_Name</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Email</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Address</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_City</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_State</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Zip</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_Country</name>
+	<required>false</required>
+    </attribute>
+  </tag>
+
+
+  <tag>
+    <name>responseData</name>
+    <tagclass>com.aitworks.beans.registartion.AddressInfo</tagclass>
+    <bodycontent>JSP</bodycontent>
+
+    <attribute>
+	<name>x_response_code</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_response_subcode</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_response_reason_code</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_response_reason_text</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_auth_code</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_avs_code</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_trans_id</name>
+	<required>true</required>
+    </attribute>
+
+    <attribute>
+	<name>x_response_reason_text</name>
+	<required>false</required>
+    </attribute>
+
+    <attribute>
+	<name>x_response_code</name>
+	<required>true</required>
+    </attribute>
+  </tag>
+</taglib>
