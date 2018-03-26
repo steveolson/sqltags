@@ -1,0 +1,579 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+	<title>MVC Heresy using &lt;SQLTags: /&gt;</title>
+
+        <meta name="keywords" content="sqltags database mvc jdo object relational mapping object-relational">
+	<meta name="description" content="Heresy: A deliberate deviation from the orthodox doctrine.  SQLTags is, indeed, a deliberate deviation from the orthodoxy of the Model-View-Control (MVC) design pattern; therefore, SQLTags is heresy, but is it necessarily bad?  In this article, I will introduce the SQLTags toolkit and when it can be successfully employed." />
+</head>
+
+<body>
+
+<h2>
+MVC Heresy using &lt;SQLTags: /&gt;</h2>
+
+<p>by Steve A. Olson<br />
+__/__/2003</p>
+
+<h3>Introduction</h3>
+
+<p>
+Heresy: A deliberate deviation from the orthodox doctrine.
+SQLTags (<a href="http://www.sqltags.org">http://sqltags.org</a>) is, indeed, a deliberate deviation from the orthodoxy of the Model-View-Control (MVC) design pattern; 
+therefore, SQLTags is heresy, but is it necessarily "bad?" 
+In this article, I will introduce the SQLTags toolkit and when it can be successfully employed.
+</p>
+
+<p>
+Notwithstanding the recent criticism by N. Alex Rupp in <a href="http://today.java.net/pub/a/today/2003/12/11/mvc.html">Beyond MVC</a>, 
+the MVC design pattern is, currently, the gold standard for highly complex web applications developed within the Servlet environment.  
+Just subscribe to any of the <a href="http://jakarta.apache.org/struts/using.html#Lists">Struts mailing lists</a> to witness how vibrant 
+this community is.  
+However, as stated on the <a href="http://jakarta.apache.org/struts/index.html">Struts main page</a> and paraphrased here, Struts and, 
+by extension, MVC are not the best choice for every project.  
+The Struts community asserts that only "very simply applications, with a handful of pages," are candidates for non-MVC implementations, 
+and with this I agree; however, the threshold of "very simple" has been changed by the introduction of SQLTags.  
+</p>
+
+<!-- co: I rephrased this to get rid of all the bold "a tag"s.  our rhetorical
+    style is usually more subtle.  ca -->
+<p>
+SQLTags implements a very simple concept:  
+<i>Database schema as Tag Library</i>. Each table is represented as a JSP tag, a tag that:
+</p>
+
+<ul>
+     <li>"knows" all of the columns</li>
+     <li>"knows" how to automatically assign HTTP request parameters to those columns</li>
+     <li>"knows" its own primary key and uses it in update and delete statements</li>
+     <li>"knows" all of its imported and exported foreign keys and, more importantly, how to use them to join to the related tables</li>
+     <li>"knows" how to write insert, update, delete, and select statements</li>
+     <li>"knows" how to process several rows at once</li>
+     <li>"knows" how to automatically output the results in pages</li>
+</ul>
+
+<p>
+in short, a tag that "knows" the underlying table and how to integrate it into the Servlet environment.
+</p>
+
+<p>
+This simple concept extends the realm of "very simple" to what was previously moderately complex, data-driven web applications.
+</p>
+
+<h3>SQLTags Features</h3>
+
+<!-- co: added an earlier reference to the website, so the curious can see who
+    it's from, verify that it's free / open-source, etc., before continuing.
+    often we'd do this by just linking the first reference to SQLTags, but
+    it's the last thing in your previous paragraph and I don't want to 
+    bury it.  ca -->
+<p>
+SQLTags, available at <a href="http://www.sqltags.org/">www.sqltags.org</a>, is a free, open source, object-relational mapping toolkit that provides a new and innovative approach to data-driven web applications development.  
+At the SQLTags core is a generator that builds a JavaBean and JSP tag for each table within a given JDBC schema.
+The SQLTags Generator packages everything (including built-in tags and support classes) into a single Java Archive or "jar" file for easy deployment
+into any Java 1.4/Servlet 2.3/JSP 1.2 (or later) J2EE Application Server.
+Best of all, SQLTags is quick and easy to learn and understand.  
+</p>
+
+<!-- co: trimmed unnecessary "input that identifies". removed quotes from
+    jar file (our readers know what jar files are and think of them as
+    jars, not as an abbreviation for Java Archive, so the quotes are
+    non-standard for us.)  ca -->
+<p>
+The SQLTags generator accepts a valid (and available) JDBC Driver, JDBC URL, user name, password, schema name, and other options 
+which are used to reverse-engineer the given database schema into the corresponding jar file.
+The resulting jar file can be deployed into any complaint Application Server.
+On the target server, the "deployment descriptor" or <code>/WEB-INF/web.xml</code> file is updated to include "context parameters"
+     that tell SQLTags how to connect to the same or an identical schema.
+     Once the generated jar file is successfully deployed into the target Application Server,
+     JSP pages can use the generated (and built-in) tags contained within the jar file to implement the desired functionality.
+     Whenever the database is changed, simply use the SQLTags Generator to "re-generate" the jar file.
+     </p>
+
+     <p>
+     Additionally, SQLTags works well with other Java and JSP industry standards like:
+     </p>
+     
+     <ul>
+	     <li><b>JavaBeans</b>:  each SQLTags tag is a JavaBean, </li>
+	     <li><b>JSTL</b>:  SQLTags beans are easily accessible within JSTL's Expression Language (EL), </li>
+	     <li><b>JSP 2.0</b>:  SQLTags tags are easily accessible using the "${" syntax, and</li>
+	     <li><b>Struts</b>:  SQLTags tags work well with the Struts "html" tags.</li>
+     </ul>
+
+     <p>
+     SQLTags is both application server and database independent. 
+     </p>
+
+     <h3>Functional Overview</h3>
+
+     <p>
+     There are three steps required to use a SQLTags generated jar file:  
+     </p>
+     <ol>
+	     <li> run the generator to create the jar file, </li>
+	     <li> deploy the generated jar file into the target web application</li>
+	     <li> author JSP pages using the tags within the target web application.</li>
+     </ol>
+
+     <p>
+     This section will provide an overview of the functionality available to the JSP developer when using a generated jar file.
+     </p>
+
+<!-- co: I changed the bold functionality headers to <h4>'s, which is more
+    in line with our usual style.  This does make for a few one-paragraph
+    sections, but I think it's OK, and since you bold your attributes and
+    tag names, I think it's cleaner overall.  ca -->
+     <h4>Built-in tags</h4>
+     
+<p>SQLTags adds a number of built-in tags to the generated jar file. 
+     These can be broken down into three main categories:  
+     </p>
+     <ul>
+	     <li> <b>paging support</b>:  <code>first</code>, <code>last</code>, <code>next</code>, and <code>previous</code>; </li>
+	     <li> <b>database support</b>:  <code>connection</code>, <code>commit</code>, <code>rollback</code>, <code>exception</code>,
+	          <code>cursor</code>, <code>statement</code>, <code>fetch</code>, <code>where</code>, and <code>orderby</code> </li>
+	     <li> <b>authorization</b>:  <code>authorize</code>, <code>allow</code>, and <code>deny</code>. </li>
+     </ul>
+
+     <p>
+     The most commonly used built-in tags are <code>connection</code>, <code>exception</code>, <code>where</code>, and <code>fetch</code>.  
+     The <code>connection</code> tag is required in every page that needs a connection to the database (almost every page). 
+     Connections can come from the built-in SQLTags connection pool defined within the "deployment descriptor" 
+     or from a container-managed DataSource.  
+     The <code>exception</code> tag outputs JDBC error messages only when things go awry with database operations.  
+     The <code>where</code> and <code>fetch</code> tags are provided as a mechanism to more easily compose complex where clauses
+     and explicitly iterate through the ResultSets.  
+     The <code>cursor</code>, <code>statement,</code> and <code>fetch</code> tags are available to provide functionality similar to the
+     JSTL "sql" tag library.  (At some point in the future, perhaps, SQLTags will integrate with the JSTL sql tag library.)
+     </p>
+
+     
+     <h4>Generated tags</h4> 
+     <p>As noted above, each table is represented as a tag and each of those tags have common attributes and methods
+     as well as unique, per-column attributes and methods.  
+     The common attributes available to all generated tags are: 
+	<code>id</code>,
+	<code>tableAlias</code>,
+	<code>buttonName</code>,
+	<code>columns</code>,
+	<code>displaySize</code>,
+	<code>foreignKey</code>,
+	<code>handlerClass</code>,
+	<code>hasFetch</code>,
+	<code>maxRows</code>,
+	<code>operation</code>,
+	<code>orderBy</code>,
+	<code>parentName</code>,
+	<code>paging</code>,
+	<code>preInsertSQL</code>,
+	<code>preUpdateSQL</code>,
+	<code>properties</code>,
+	<code>startRowParameter</code>,
+	<code>where</code>,
+	and
+	<code>from</code>.
+     </p>
+
+<!-- co: moved up this header since the copy below talks about these 
+    generated attributes, so we want it all under the same header. ca -->
+     <h4>Attributes</h4>
+     <p>
+     Additionally, for each column, <i>COL</i>, there are four generated tag attributes:  
+     </p>
+
+     <ul>
+	     <li> <i>COL</i>, </li>
+	     <li> <i>COL</i>_FORMAT, </li>
+	     <li> <i>COL</i>_SELECT, and </li>
+	     <li> <i>COL</i>_BIND. </li>
+     </ul>
+
+     
+     <p>The "<i>COL</i>" attributes allow the value of the column to be explicitly set,
+     <i>COL</i>_FORMAT provides a mechanism for specifying the display format for date and number columns,
+     <i>COL</i>_SELECT provides a mechanism to override the select-list item for the column,
+     and a <i>COL</i>_BIND provides a mechanism to override the bind expression used in a PreparedStatement 
+     (every SQLTags SQL statement uses the PreparedStatement). 
+     Some of the more commonly used attributes are:
+     </p>
+
+     <ul>
+	     <li> <b>id</b>:  defines the snippet variable that can be used within JSP snippets or EL expressions;</li>
+	     <li> <b>operation</b>:  defines an explicit operation to be carried out on the table (insert, update, delete, deleteChildren, or select);</li>
+	     <li> <b>buttonName</b>:  defines a request parameter that contains the operation;</li>
+	     <li> <b>foreignKey combined with parentName</b>:  used to nest tags in a parent-child configuration;</li>
+	     <li> <b>paging="true" and displaySize</b>:  define paging behavior;</li>
+	     <li> <b>properties="true"</b>:  tells the tag to scan the HTTP Request for parameter names that match column names;</li>
+	     <li> <b>where</b>:  defines the where condition and causes the tag body to iterate once for each row that satisfies the given condition.</li>
+     </ul>
+
+     
+     <h4>Methods</h4>
+     <p>Some of the more useful methods available to all generated tags are:
+     <code>insert()</code>, <code>update()</code>, <code>delete()</code>, and <code>delete(where)</code>.  
+     Additionally, because each table tag is a JavaBean, each column, <i>COL</i>, has <code>set<i>COL</i>()</code> and <code>get<i>COL</i>()</code>
+     methods and each foreign key, <i>FK</i>, has a <code>get<i>FK</i>()</code> method &#8212; again very useful for EL expressions.
+     </p>
+
+
+     <h4>Foreign Keys</h4>
+     <p>SQLTags makes extensive use of foreign keys.
+     Take a look at any Entity-Relationship Diagram, the glue that holds any database together is the foreign keys.
+     Indeed, in my experience the majority of the navigation within a data-driven web application centers on the foreign keys,
+     either through parent table lookups or through parent-child nesting.  
+     For example, given an Employee, "what Department is she assigned to?"
+     or given a Department "who are the Employees contained within it?" 
+     or given an Invoice, list the Invoice Line Items and related Product Names.  
+     These questions are all answered by foreign keys.
+     </p>
+
+<!-- co: moved the figure all the way up here because your reference to 
+    it would be too far away otherwise.  besides, when the readers see it
+    here and get used to it, you can just refer back to it later in the 
+    section where it was originally located.  ca -->
+     <p>
+     SQLTags provides powerful ways to leverage foreign keys using "declarative access."
+     For example, imagine two tables <code>EMP</code> and <code>DEPT</code> with a foreign key,
+     <code>FK_DEPTNO</code>, defined within <code>EMP</code>
+     referencing <code>DEPT</code>, as illustrated by Figure 1:</p>
+
+     <p><img src="datamodel.jpg"/><br/>
+        <i>Figure 1. Sample Datamodel</i></p>
+
+
+
+     <p>When SQLTags generates our hypothetical <code>EMP</code> JavaBean,
+     it would contain a <code>getFK_DEPTNO()</code> method that returns a <code>DEPT</code> JavaBean.
+     Consider the following JSP 2.0 snippet.
+     </p>
+
+<pre><code>&lt;x:emp id="e" where="order by ENAME"&gt;
+   ${e.ENAME} belongs to Department
+   ${e.FK_DEPTNO.DNAME}!&lt;br/&gt;
+&lt;/x:emp&gt;
+</code></pre>
+
+     <p>
+     As expected, the column values are easily accessible using EL (beginning of second line)
+     based on standard JavaBean syntax; 
+     however and perhaps not expected, the foreign keys are also available in exactly the same way!  
+     Need the Department name, <code>DNAME</code>, for a given Employee? 
+     Simply use the foreign key <code>FK_DEPTNO</code> as the getter for the related Department. <i>Wow!</i>
+     </p>
+
+     <p>
+     SQLTags also provides a mechanism for nesting children records within their parents, again, using foreign keys.
+     Consider the following JSP 2.0 snippet.
+     </p>
+
+<pre><code>&lt;x:dept id="d" where="order by DNAME"&gt;
+ &lt;p&gt;${d.DNAME} has the following employees:
+   &lt;x:emp id="e" foreignKey="FK_DEPTNO"
+                 parentName="d"&gt;
+      ${e.ENAME}
+  &lt;/x:emp&gt;
+ &lt;/p&gt;
+&lt;/x:dept&gt;
+</code></pre>
+
+     <p>
+     Again, note how easily the list of Employees for a given Department can be obtained simply by knowing 
+     the foreign key name and the <code>"id"</code> of the <code>DEPT</code> tag.
+     </p>
+
+     <p>
+     Finally, consider how simple it is for a programmer
+     (or even a designer, heaven forbid) to look at an Entity-Relationship Diagram
+     and start connecting the dots.
+     </p>
+
+     <h3>Running the SQLTags Generator</h3>
+
+     <p>
+     Download the <code>sqltags-1-0-6.war</code> (or latest version) web application file from the SQLTags web site at
+     <a href="http://sqltags.org/downloads.jsp">http://sqltags.org/downloads.jsp</a> and deploy it into your favorite J2EE Application Server.  
+     <i>Note: SQLTags requires Java 1.4, Servlet 2.3 or later, JSP 1.2 or later
+	     and a suitable JDBC driver for your specific database.</i>
+     The SQLTags web application comes with pre-installed JDBC drivers for Oracle, MySQL, and Sybase.  
+     The JDBC Driver for Microsoft SQL Server is also included but is in the 
+     <code>/WEB-INF/extras</code> directory and must be manually moved into
+     <code>/WEB-INF/lib</code> in order to access a SQL Server database.
+     </p>
+
+     <p>
+     <i><b>Note</b>: the <code>javac</code> executable must be accessible via the PATH variable (by the application server) 
+	     in order to compile the generated JavaBean classes.</i>
+     </p>
+     
+     <p>
+     To deploy the <code>sqltags-1-0-6.war</code> file into the Tomcat Application Server,
+     for example, simply copy the "war" file into the <code>CATALINA_HOME/webapps</code> directory,
+     restart the server,
+     and access the <code>/sqltags-1-0-6/</code> URI on your deployment host using your browser.  
+     For example, if you were running Tomcat on your local workstation on port 8080 you would use the following URL to run the SQLTags web application:
+     <code>http://localhost:8080/sqltags-1-0-6/</code> 
+     The SQLTags web application contains information and samples for running the generator, deploying the jar files, and building JSP pages.
+     </p>
+
+     <p>
+     To execute the generator from your browser,
+     simply click on the <code>"run ..."</code> link near the top of the page
+     (using the above example, the URL would be <code>http://localhost:8080/sqltags-1-0-6/generate.jsp</code>).
+     Fill-in all the fields and click on the <code>"Generate!"</code> button.  
+     That's it, really!
+     </p>
+
+     <p>
+     The generate screen contains detailed descriptions for each input field.
+     Basically, you'll need to specify:
+     </p>
+
+     <ul>
+	     <li> the JDBC Driver and URL, </li>
+	     <li> the database user name and password,</li>
+	     <li> the JDBC Schema name,</li>
+	     <li> a Java package for the generated Java code,</li>
+	     <li> a jar file name, and </li> 
+	     <li> flags to control inclusion of the built-in tags and source code.</li>
+     </ul>
+
+     <p>
+     Once the generator completes, you should see output in the browser window showing that each table was processed.
+     The generated jar file is saved into the <code>/WEB-INF/tmp</code> directory using the file name specified in the "JAR Filename" input field.
+     <i>Note: future releases of SQLTags will likely place the generated jar file in the /tmp directory under the web application.</i>
+     </p>
+
+     <p>
+     <i><b>Note</b>: SQLTags will not generate foreign key references to tables that are either not contained within the generated jar 
+	     file due to wildcard exclusion or do not have a primary key.</i>
+     </p>
+
+     <h3>Deploying a Generated Tag Library</h3>
+
+     <p>
+     Deployment of the generated jar file is accomplished in two steps:  
+     </p>
+
+     <ol>
+	     <li> copy the generated jar file into the <code>/WEB-INF/lib</code> directory of the target web application and </li>
+	     <li> modify the <code>/WEB-INF/web.xml</code> (deployment descriptor) to define the SQLTags "context parameters." </li>
+     </ol>
+
+     <p>
+     You'll likely need to restart the web application for the changes to take effect.
+     </p>
+
+     
+     <h4>Context Parameters</h4>
+     <p>Context parameters are added to the <code>/WEB-INF/web.xml</code> deployment descriptor immediately after the &lt;web-app&gt; tag using the following syntax. 
+     </p>
+
+<pre><code>&lt;context-param&gt;
+  &lt;param-name&gt;SQLTags.useCM&lt;/param-name&gt;
+  &lt;param-value&gt;true&lt;/param-value&gt;
+&lt;/context-param&gt;
+</code></pre>
+
+     <p>
+     The list of SQLTags context parameters is as follows:
+     </p>
+
+
+<!-- co: cleaned up syntax, clarity on these items a little. ca -->
+     <ul>
+	     <li><b><code>SQLTags.useCM</code></b>: Short for "use internal Connection Manager".  Valid values are <code>true</code> or <code>false</code>.
+	     When <code>false</code> SQLTags will use a DataSource and ignore the other SQLTags JDBC context parameters (listed below).
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.dataSource</code></b>: Identifies the default <code>dataSource</code> to be used by the <code>ConnectionTag</code>
+	     when no <code>dataSource</code> attribute is supplied and <code>useCM</code> is <code>false</code>; default value is <code>jdbc/SQLTagsDS</code>. 
+	     <B>Note</b>: a DataSource is used when <code>useCM</code> is <code>false</code> or when a <code>connectionTag</code> explicitly references a 
+		     <code>dataSource</code> from the <code>dataSource</code> attribute.
+	     </li>
+
+	     <li><b><code>SQLTags.bindStrings</code></b>: Should almost always be set of <code>false</code>; when <code>true</code> all database
+	     bindings are processed as strings,
+	     when <code>false</code> all numerical and date data types are processed as the correct native Java type.
+	     Greatly helps with compatibility among different databases. 
+	     </li>
+     </ul>
+
+     <p>
+     The following parameters are only used when <code>SQLTags.useCM</code> is <code>true</code>.
+     When <code>useCM</code> is <code>false</code> the JDBC parameters are defined externally within a <code>DataSource</code>.
+     </p>
+
+     <ul>
+
+	     <li><b><code>SQLTags.databaseDriver</code></b>: The JDBC database driver as specified by JDBC vendor.
+	     <br/>
+	     Examples: <code>oracle.jdbc.OracleDriver</code>, <code>org.gjt.mm.mysql.Driver</code>.
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.connectionUrl</code></b>:  The JDBC connection URL as specified by JDBC vendor.
+	     <br/>
+	     Examples: <code>jdbc:mysql://localhost/scott?user=root</code>, <code>jdbc:oracle:thin:@localhost:1521:ORCL</code>.
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.maxPoolSize</code></b>:  Maximum number of JDBC connections for the connection pool.
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.poolSize</code></b>:  Default size of the JDBC connection pool.
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.userName</code></b>:  Database user for JDBC connections.
+	     <!-- <br/><br/> -->
+	     </li>
+
+	     <li><b><code>SQLTags.password</code></b>:  Database user's password.
+	     <!-- <br/><br/> -->
+	     </li>
+     </ul>
+
+     <h3>Authoring JSP Pages with SQLTags</h3>
+
+     <p>
+     SQLTags development starts with a well-defined data model.
+     So, for the purposes of this article, I will refer to the "classic" EMP-DEPT data model that was shown above in Figure 1.
+     </p>
+
+	<h4>Sample 1. Listing all EMP data with related DEPT name.</h4>
+
+     <p>
+	In this first example,
+	I will demonstrate a simple JSP page that displays a listing of all rows from the EMP table and their assigned DEPT.  
+     </p>
+
+<pre><code>&lt;%@ taglib uri="demoTags.jar" prefix="sqltags" %&gt;
+&lt;%@ taglib uri="http://java.sun.com/jstl/core"
+    prefix="c" %&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;JSP Page&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;%-- uses configuration from web.xml.  --%&gt;
+&lt;sqltags:connection id="connect" &gt;
+   &lt;sqltags:emp id="e" where="order by ename"&gt;
+        &lt;c:out value="${e.ENAME}"/&gt; assigned to 
+        &lt;c:out value="${e.FK_DEPTNO.DNAME}"/&gt;
+        &lt;br&gt;
+   &lt;/sqltags:emp&gt;
+&lt;/sqltags:connection&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+     <p>
+     The first two lines introduce the two tag libraries used within the JSP page.
+     The <code>&lt;sqltags:connection&gt;</code> tag is used to access the JDBC connection pool which must wrap all of the other SQLTags tags.
+     The next line introduces the EMP tag and defines a "where clause" that matches all rows and orders the results by ENAME.
+     The JSTL &lt;c:out&gt; tags are used to output the <code>ENAME</code> property from the <code>EMP</code> JavaBean
+     (<code>ENAME</code> is a column from the <code>EMP</code> table).
+     Finally, the <code>DNAME</code> property from the related <code>DEPT</code> table is output for each <code>EMP</code> in the table.
+     </p>
+
+     <p>Viewing the above page from the browser would yield the output shown in Figure 2, provided we have suitable data in the database:
+     </p>
+
+     <p><img src="output1.jpg" /><br />
+        <i>Figure 2. Sample Output: single table query</i>
+     </p>
+
+     <h4>Sample 2. Parent-Child nesting of EMP within DEPT.</h4>
+
+     <p>In the second example,
+     I will demonstrate a simple JSP page that implements the parent-child configuration listing EMPs within each DEPT.
+     </p>
+
+<pre><code>&lt;%@ taglib uri="demoTags.jar" prefix="sqltags" %&gt;
+&lt;%@ taglib uri="http://java.sun.com/jstl/core"
+    prefix="c" %&gt;
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;JSP Page&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+&lt;%-- uses configuration from web.xml.  --%&gt;
+&lt;sqltags:connection id="connect" &gt;
+ &lt;sqltags:dept id="d" where="order by DNAME"&gt;
+   &lt;c:out value="${d.DNAME}" /&gt;
+   &lt;blockquote&gt;
+     &lt;sqltags:emp id="e" foreignKey="FK_DEPTNO"
+                  parentName="d"&gt;
+       &lt;c:out value="${e.ENAME}"/&gt;
+       &lt;br&gt;
+     &lt;/sqltags:emp&gt;
+   &lt;/blockquote&gt;
+ &lt;/sqltags:dept&gt;
+&lt;/sqltags:connection&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+     <p>
+     Again,
+     the first two lines introduce the two tag libraries used within the JSP page.
+     The <code>&lt;sqltags:connection&gt;</code> tag is used to access the JDBC connection pool, and must wrap all of the other SQLTags tags.
+     The <code>DEPT</code> tag defines a "where clause" that matches all rows and orders the results by DNAME.
+     The next line outputs the department name (<code>DNAME</code>)
+     and the <code>blockquote</code> provides a visual indentation showing employees that belong to each department.
+     The <code>EMP</code> tag provides the mechanism to nest the employees within the related <code>DEPT</code>. 
+     The <code>foreignKey</code> attribute tells the <code>EMP</code> tag
+     which foreign to use to reference (join to) the <code>DEPT</code> tag
+     and the <code>parentName</code> attribute identifies which <code>DEPT</code> tag instance should be referenced.
+     The next line simply outputs each employee name one per line.  
+     </p>
+
+     <p>
+     Figure 3 shows sample output from this page:
+     </p>
+
+     <p><img src="output2.jpg" /><br />
+        <i>Figure 3. Sample Output: parent-child nesting.</i>
+     </p>
+
+     <h3>Summary and Preview of Advanced Topics</h3>
+
+<!-- co: you sort of go from "there's a lot more functionality", to a sell
+    of why SQLTags are useful, back to the advanced functionality.  I moved
+    the advanced stuff up to join the "scratch the surface" text, and let
+    this close with the sell.  ca -->
+     <p>
+     I've just scratched the surface of what is possible with SQLTags.
+     There is a lot more functionality available within the tool set, including:</p>
+     <ul>
+	     <li> multi-row insert, update, and delete in HTML</li>
+	     <li> Application Server deployment</li>
+	     <li> using <code>DataSources</code></li>
+	     <li> using authentication and access control with <code>allow</code>, <code>deny</code>, and <code>auth</code> tags</li>
+	     <li> using "handler" classes to easily deal with <code>BLOB</code> and <code>CLOB</code> column types, paging of results, etc.</li>
+     </ul>
+
+
+     
+     <p>Hopefully, you've seen enough to whet your interest to investigate further.
+     MVC is a also great design pattern,
+     but SQLTags can be successfully employed when used to develop a data-driven web application
+     that closely follows a well defined data model with limited processing logic.
+     </p>
+
+     <p>
+     Basically, for data-in, data-out applications, SQLTags is just the ticket.
+     </p>
+
+<!-- this has been copied over to your author page.  a one-line "short bio"
+    will be inserted here by the production people.  btw, is it
+    "capital hill" or "capitol hill"?
+     <p>
+     Steve A. Olson is a founder and Chairman of the Board of Applied Information Technologies, Inc.  <a href="http://ait-inc.com">http://ait-inc.com</a>
+     and is currently serving the House and Senate within the Office of Legislative Information at the
+     Congressional Research Service on Capital Hill.
+     </p>
+
+-->
+
+</body>
+</html>
